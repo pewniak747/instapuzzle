@@ -12,7 +12,7 @@ object MySocketIOController extends SocketIOController {
   val clientTimeout = Timeout(10.seconds)
 
   def processMessage(sessionId: String, packet: Packet) {
-    enqueueJsonMsg(sessionId, """{"hello":"hai"}""") 
+    enqueueEvent(sessionId, """{"name":"dupa","args":[{}]}""")
   }
 
   override def initSession = Action { implicit request =>
