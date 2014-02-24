@@ -4,9 +4,11 @@ import scala.concurrent.duration._
 import akka.util.Timeout
 import akka.actor._
 import play.api.libs.concurrent.Akka
+import play.api.libs.iteratee._
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.Play.current
+import play.api.libs.concurrent.Execution.Implicits._
 
 import socketio._
 import socketio.PacketTypes._
@@ -54,6 +56,12 @@ class EventDispatcher(controller: SocketIOController) extends Actor with ActorLo
           ) }.toList
         ))
       )
+      case PlayerLeft(id) => Json.obj(
+        "name" -> "player:left",
+        "args" -> Json.arr(Json.obj(
+          "id" -> id
+        ))
+      )
       case _ => Json.obj()
     }
   }
@@ -79,6 +87,21 @@ object MySocketIOController extends SocketIOController {
     System.err.println("Strating new session: " + sessionId)
     val t = clientTimeout.duration.toSeconds.toString
     Ok(sessionId + ":" + t + ":" + t +":websocket")
+  }
+
+  override def handleConnectionSetup(sessionId: String, enumerator: Enumerator[String]):
+    (Iteratee[String, Unit], Enumerator[String]) = {
+    val iteratee = Iteratee.foreach[String] {
+      socketData =>
+      wsMap(sessionId) ! ProcessPacket(socketData)
+    }.mapDone {
+      _ => {
+        println("all done quit.")
+        game.tell(PlayerLeave(sessionId), dispatcher)
+      }
+    }
+    wsMap(sessionId) ! EventOrNoop
+    (iteratee, enumerator)
   }
 
   private
