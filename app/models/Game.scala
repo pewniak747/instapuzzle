@@ -24,6 +24,9 @@ class GameActor extends Actor with ActorLogging {
         sender ! PlayerLeft(player.id)
       }
     }
+    case PlayersSync() => {
+      sender ! PlayersSynced(playersMap.values.toList)
+    }
     case _ => Nil
   }
 

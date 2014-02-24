@@ -12,6 +12,7 @@ import socketio._
 import socketio.PacketTypes._
 
 import models.GameActor
+import models.Player
 
 class Event
 
@@ -23,9 +24,16 @@ case class PlayerLeave(sessionId: String) extends Event
 
 case class PlayerLeft(id: String) extends Event
 
+case class PlayersSync extends Event
+
+case class PlayersSynced(players: Seq[Player]) extends Event
+
 class EventDispatcher(controller: SocketIOController) extends Actor with ActorLogging {
   def receive = {
-    case event : Event => controller.broadcastEvent(Json.toJson(event).toString)
+    case event : Event => {
+      System.err.println("Outgoing event: " + event.toString)
+      controller.broadcastEvent(Json.toJson(event).toString)
+    }
   }
 
   implicit val eventWrites = new Writes[Event] {
@@ -35,6 +43,15 @@ class EventDispatcher(controller: SocketIOController) extends Actor with ActorLo
         "args" -> Json.arr(Json.obj(
           "id" -> id,
           "name" -> name
+        ))
+      )
+      case PlayersSynced(players) => Json.obj(
+        "name" -> "player:synced",
+        "args" -> Json.arr(Json.toJson(
+          players.map { player => Json.obj(
+            "id" -> player.id,
+            "name" -> player.name
+          ) }.toList
         ))
       )
       case _ => Json.obj()
@@ -52,6 +69,7 @@ object MySocketIOController extends SocketIOController {
 
   def processMessage(sessionId: String, packet: Packet) {
     parseIncomingEvent(sessionId, packet.data).map { event =>
+      System.err.println("Incoming event: " + event.toString)
       game.tell(event, dispatcher)
     }
   }
@@ -72,6 +90,7 @@ object MySocketIOController extends SocketIOController {
       val eventArgs = (json \ "args")
       (eventName, eventArgs) match {
         case (JsString("player:join"), _) => Some(PlayerJoin(sessionId))
+        case (JsString("player:sync"), _) => Some(PlayersSync())
         case _ => None
       }
     }
