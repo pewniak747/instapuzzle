@@ -13,22 +13,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import socketio._
 import socketio.PacketTypes._
 
-import models.GameActor
-import models.Player
-
-class Event
-
-case class PlayerJoin(sessionId: String) extends Event
-
-case class PlayerJoined(id: String, name: String) extends Event
-
-case class PlayerLeave(sessionId: String) extends Event
-
-case class PlayerLeft(id: String) extends Event
-
-case class PlayersSync extends Event
-
-case class PlayersSynced(players: Seq[Player]) extends Event
+import models._
 
 class EventDispatcher(controller: SocketIOController) extends Actor with ActorLogging {
   def receive = {
@@ -73,7 +58,7 @@ object MySocketIOController extends SocketIOController {
 
   val dispatcher = Akka.system.actorOf(Props(new EventDispatcher(this)))
 
-  val game = Akka.system.actorOf(Props[GameActor], name = "game")
+  val game = Akka.system.actorOf(Props[Game], name = "game")
 
   def processMessage(sessionId: String, packet: Packet) {
     parseIncomingEvent(sessionId, packet.data).map { event =>

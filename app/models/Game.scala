@@ -8,7 +8,7 @@ import controllers._
 
 case class Player(id: String, name: String)
 
-class GameActor extends Actor with ActorLogging {
+class Game extends Actor with ActorLogging {
 
   var playersMap:  mutable.Map[String, Player] = mutable.Map.empty
 
