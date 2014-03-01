@@ -17,14 +17,14 @@ import models._
 
 class EventDispatcher(controller: SocketIOController) extends Actor with ActorLogging {
   def receive = {
-    case event : Event => {
+    case event : OutgoingEvent => {
       System.err.println("Outgoing event: " + event.toString)
       controller.broadcastEvent(Json.toJson(event).toString)
     }
   }
 
-  implicit val eventWrites = new Writes[Event] {
-    def writes(event: Event) = event match {
+  implicit val eventWrites = new Writes[OutgoingEvent] {
+    def writes(event: OutgoingEvent) = event match {
       case PlayerJoined(id, name) => Json.obj(
         "name" -> "player:joined",
         "args" -> Json.arr(Json.obj(
@@ -91,14 +91,14 @@ object MySocketIOController extends SocketIOController {
 
   private
 
-  def parseIncomingEvent(sessionId: String, data: String): Option[Event] = {
+  def parseIncomingEvent(sessionId: String, data: String): Option[IncomingEvent] = {
     try {
       val json = Json.parse(data)
       val eventName = json \ "name"
       val eventArgs = (json \ "args")
       (eventName, eventArgs) match {
         case (JsString("player:join"), _) => Some(PlayerJoin(sessionId))
-        case (JsString("player:sync"), _) => Some(PlayersSync())
+        case (JsString("player:sync"), _) => Some(PlayersSync(sessionId))
         case _ => None
       }
     }
