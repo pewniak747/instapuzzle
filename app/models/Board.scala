@@ -3,6 +3,7 @@ package models
 import java.util.UUID
 import scala.util.Random
 import scala.collection.mutable
+import scala.collection.concurrent
 
 case class Piece(val id: String) {
   require(id.size > 0)
@@ -30,8 +31,7 @@ class Board(val imageURL: String, val width: Int, val height: Int) {
       targetPiece <- at(target);
       source <- positionOf(piece)
     } yield {
-      piecePositions.put(target, piece)
-      piecePositions.put(source, targetPiece)
+      piecePositions ++= Map(target -> piece, source -> targetPiece)
       (targetPiece, source)
     }
   }
@@ -42,7 +42,7 @@ class Board(val imageURL: String, val width: Int, val height: Int) {
 
   def shuffle = do {
     val shuffledPieces = Random.shuffle(pieces.toList)
-    piecePositions = mutable.Map((positions zip shuffledPieces).toSeq:_*)
+    piecePositions = concurrent.TrieMap((positions zip shuffledPieces).toSeq:_*)
   } while (isFinished)
 
   private val positions: Set[Position] = (for {
@@ -52,7 +52,7 @@ class Board(val imageURL: String, val width: Int, val height: Int) {
 
   private var correctPositions = (positions zip pieces).toMap
 
-  private var piecePositions = mutable.Map[Position, Piece](correctPositions.toSeq:_*)
+  private var piecePositions = concurrent.TrieMap[Position, Piece](correctPositions.toSeq:_*)
 
   private def positionOf(piece: Piece): Option[Position] = piecePositions.map(_.swap).get(piece)
 
