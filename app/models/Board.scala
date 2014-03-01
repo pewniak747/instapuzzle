@@ -31,13 +31,14 @@ class Board(val imageURL: String, val width: Int, val height: Int) {
 
   def at(pos: Position): Option[Piece] = piecePositions.get(pos)
 
-  def move(piece: Piece, position: Position) = {
+  def move(piece: Piece, target: Position) = {
     for {
-      targetPiece <- at(position);
+      targetPiece <- at(target);
       source <- positionOf(piece)
     } yield {
-      piecePositions.put(position, piece)
+      piecePositions.put(target, piece)
       piecePositions.put(source, targetPiece)
+      (targetPiece, source)
     }
   }
 
