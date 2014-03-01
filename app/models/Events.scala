@@ -14,7 +14,7 @@ case class BoardSync(sessionId: String) extends IncomingEvent(sessionId)
 
 case class PiecePickup(sessionId: String, pieceId: String) extends IncomingEvent(sessionId)
 
-case class PieceMove(sessionId: String, pieceId: String) extends IncomingEvent(sessionId)
+case class PieceMove(sessionId: String, pieceId: String, x: Int, y: Int) extends IncomingEvent(sessionId)
 
 class OutgoingEvent extends Event
 
