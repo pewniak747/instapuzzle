@@ -1,6 +1,7 @@
 package models
 
 import java.util.UUID
+import scala.util.Random
 import scala.collection.mutable
 
 case class Piece(val id: String) {
@@ -38,6 +39,11 @@ class Board(val imageURL: String, val width: Int, val height: Int) {
   def isFinished = positions.forall { position =>
     piecePositions(position) == correctPositions(position)
   }
+
+  def shuffle = do {
+    val shuffledPieces = Random.shuffle(pieces.toList)
+    piecePositions = mutable.Map((positions zip shuffledPieces).toSeq:_*)
+  } while (isFinished)
 
   private val positions: Set[Position] = (for {
     y <- 0 until height;

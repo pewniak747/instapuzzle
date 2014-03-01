@@ -110,7 +110,7 @@ class BoardSpec extends Specification {
 
     "isFinished" in new WithBoard {
 
-      "is true for new board" in {
+      "is true for new board" in new WithBoard {
         board.isFinished must beTrue
       }
 
@@ -124,6 +124,16 @@ class BoardSpec extends Specification {
         board.move(board.at(Position(0, 0)).get, Position(1, 1))
         board.isFinished must beTrue
       }
+
+    }
+
+    "shuffle" in new WithBoard {
+
+      "makes board not finished" in new WithBoard {
+        board.shuffle
+        board.isFinished must beFalse
+      }
+
     }
 
   }
