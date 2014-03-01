@@ -108,5 +108,24 @@ class BoardSpec extends Specification {
 
     }
 
+    "isFinished" in new WithBoard {
+
+      "is true for new board" in {
+        board.isFinished must beTrue
+      }
+
+      "is false for disrupted board" in new WithBoard {
+        board.move(board.at(Position(1, 1)).get, Position(0, 0))
+        board.isFinished must beFalse
+      }
+
+      "is true after solving the board" in new WithBoard {
+        board.move(board.at(Position(1, 1)).get, Position(0, 0))
+        board.move(board.at(Position(0, 0)).get, Position(1, 1))
+        board.isFinished must beTrue
+      }
+    }
+
   }
+
 }

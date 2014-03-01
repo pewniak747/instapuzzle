@@ -22,13 +22,6 @@ class Board(val imageURL: String, val width: Int, val height: Int) {
     Piece(UUID.randomUUID.toString)
   }.toSet
 
-  private val positions: Set[Position] = (for {
-    y <- 0 until height;
-    x <- 0 until width
-  } yield Position(x, y)).toSet
-
-  private var piecePositions = mutable.Map[Position, Piece]((positions zip pieces).toSeq:_*)
-
   def at(pos: Position): Option[Piece] = piecePositions.get(pos)
 
   def move(piece: Piece, target: Position) = {
@@ -42,5 +35,19 @@ class Board(val imageURL: String, val width: Int, val height: Int) {
     }
   }
 
+  def isFinished = positions.forall { position =>
+    piecePositions(position) == correctPositions(position)
+  }
+
+  private val positions: Set[Position] = (for {
+    y <- 0 until height;
+    x <- 0 until width
+  } yield Position(x, y)).toSet
+
+  private var correctPositions = (positions zip pieces).toMap
+
+  private var piecePositions = mutable.Map[Position, Piece](correctPositions.toSeq:_*)
+
   private def positionOf(piece: Piece): Option[Position] = piecePositions.map(_.swap).get(piece)
+
 }
