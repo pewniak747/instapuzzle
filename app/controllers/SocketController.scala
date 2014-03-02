@@ -53,7 +53,7 @@ object MySocketIOController extends SocketIOController {
     val iteratee = Iteratee.foreach[String] {
       socketData =>
       wsMap(sessionId) ! ProcessPacket(socketData)
-    }.mapDone {
+    }.map {
       _ => {
         println("all done quit.")
         game ! PlayerLeave(sessionId)
@@ -94,7 +94,7 @@ object MySocketIOController extends SocketIOController {
       }
     }
     catch {
-      case _ => None
+      case _: Throwable => None
     }
   }
 
