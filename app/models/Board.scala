@@ -19,10 +19,19 @@ class Board(val imageURL: String, val width: Int, val height: Int) {
   require(width > 1)
   require(height > 1)
 
+  val positions: List[Position] = (for {
+    y <- 0 until height;
+    x <- 0 until width
+  } yield Position(x, y)).toList
+
   val size = width * height
-  val pieces: Set[Piece] = (1 to size).map { _ =>
-    Piece(UUID.randomUUID.toString)
-  }.toSet
+
+  val pieces: List[Piece] = positions.map { position =>
+    val x = position.x
+    val y = position.y
+    val uuid = UUID.randomUUID.toString
+    Piece(s"$x:$y:$uuid")
+  }.toList
 
   def at(pos: Position): Option[Piece] = piecePositions.get(pos)
 
@@ -41,14 +50,9 @@ class Board(val imageURL: String, val width: Int, val height: Int) {
   }
 
   def shuffle = do {
-    val shuffledPieces = Random.shuffle(pieces.toList)
+    val shuffledPieces = Random.shuffle(pieces)
     piecePositions = concurrent.TrieMap((positions zip shuffledPieces).toSeq:_*)
   } while (isFinished)
-
-  val positions: Set[Position] = (for {
-    y <- 0 until height;
-    x <- 0 until width
-  } yield Position(x, y)).toSet
 
   private var correctPositions = (positions zip pieces).toMap
 
