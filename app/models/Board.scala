@@ -45,7 +45,7 @@ class Board(val imageURL: String, val width: Int, val height: Int) {
     piecePositions = concurrent.TrieMap((positions zip shuffledPieces).toSeq:_*)
   } while (isFinished)
 
-  private val positions: Set[Position] = (for {
+  val positions: Set[Position] = (for {
     y <- 0 until height;
     x <- 0 until width
   } yield Position(x, y)).toSet
