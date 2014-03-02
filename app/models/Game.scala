@@ -1,8 +1,8 @@
 package models
 
 import akka.actor._
-
 import scala.collection.mutable
+import faker.Name
 
 import controllers._
 
@@ -22,7 +22,7 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
 
     case PlayerJoin(sessionId) => {
       val id = sessionId
-      val name = "random name"
+      val name = Name.name
       playersMap.put(sessionId, Player(id, name))
       broadcast ! PlayerJoined(id, name)
     }
