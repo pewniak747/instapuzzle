@@ -18,72 +18,12 @@ import models._
 class EventDispatcher(controller: SocketIOController) extends Actor with ActorLogging {
   def receive = {
     case event : OutgoingEvent => {
-      System.err.println("Outgoing event: " + event.toString)
+      System.err.println("Outgoing broadcast event: " + event.toString)
       controller.broadcastEvent(Json.toJson(event).toString)
     }
   }
 
-  implicit val eventWrites = new Writes[OutgoingEvent] {
-    def writes(event: OutgoingEvent) = event match {
-      case PlayerJoined(id, name) => Json.obj(
-        "name" -> "player:joined",
-        "args" -> Json.arr(Json.obj(
-          "id" -> id,
-          "name" -> name
-        ))
-      )
-      case PlayersSynced(players) => Json.obj(
-        "name" -> "player:synced",
-        "args" -> Json.arr(Json.toJson(
-          players.map { player => Json.obj(
-            "id" -> player.id,
-            "name" -> player.name
-          ) }.toList
-        ))
-      )
-      case PlayerLeft(id) => Json.obj(
-        "name" -> "player:left",
-        "args" -> Json.arr(Json.obj(
-          "id" -> id
-        ))
-      )
-      case BoardSynced(board) => Json.obj(
-        "name" -> "board:synced",
-        "args" -> Json.arr(Json.obj(
-          "imageURL" -> board.imageURL,
-          "width" -> board.width,
-          "height" -> board.height,
-          "pieces" -> Json.toJson(
-            board.positions.map { position =>
-              Json.obj(
-                "id" -> board.at(position).get.id,
-                "x" -> position.x,
-                "y" -> position.y
-              )
-            }
-          )
-        ))
-      )
-      case PiecePicked(player, pieceId) => Json.obj(
-        "name" -> "piece:picked",
-        "args" -> Json.arr(Json.obj(
-          "player_id" -> player.id,
-          "piece_id" -> pieceId
-        ))
-      )
-      case PieceMoved(pieceId, position) => Json.obj(
-        "name" -> "piece:moved",
-        "args" -> Json.arr(Json.obj(
-          "piece_id" -> pieceId,
-          "position" -> Json.obj(
-            "x" -> position.x,
-            "y" -> position.y
-          )
-        ))
-      )
-      case _ => Json.obj()
-    }
-  }
+  implicit val serializer = new Serializer
 }
 
 object MySocketIOController extends SocketIOController {
@@ -92,12 +32,12 @@ object MySocketIOController extends SocketIOController {
 
   val dispatcher = Akka.system.actorOf(Props(new EventDispatcher(this)))
 
-  val game = Akka.system.actorOf(Props[Game], name = "game")
+  val game = Akka.system.actorOf(Props(new Game(dispatcher)), name = "game")
 
   def processMessage(sessionId: String, packet: Packet) {
     parseIncomingEvent(sessionId, packet.data).map { event =>
       System.err.println("Incoming event: " + event.toString)
-      game.tell(event, dispatcher)
+      game.tell(event, wsMap(sessionId))
     }
   }
 
@@ -116,11 +56,25 @@ object MySocketIOController extends SocketIOController {
     }.mapDone {
       _ => {
         println("all done quit.")
-        game.tell(PlayerLeave(sessionId), dispatcher)
+        game ! PlayerLeave(sessionId)
       }
     }
     wsMap(sessionId) ! EventOrNoop
     (iteratee, enumerator)
+  }
+
+  override def wsHandler(sessionId: String) = WebSocket.using[String] {
+    implicit request =>
+      if (wsMap contains sessionId) {
+        handleConnectionFailure(Json.stringify(Json.toJson(Map("error" -> "Invalid Session ID"))))
+      } else {
+        println("creating new websocket actor")
+        val (in, channel) = Concurrent.broadcast[String]
+        val wsActor = Akka.system.actorOf(Props(new WebsocketActor(channel, processMessage, wsMap, wsRevMap, clientTimeout)))
+        wsMap    += (sessionId -> wsActor)
+        wsRevMap += (wsActor -> sessionId)
+        handleConnectionSetup(sessionId, in)
+      }
   }
 
   private

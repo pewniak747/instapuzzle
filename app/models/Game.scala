@@ -8,7 +8,7 @@ import controllers._
 
 case class Player(id: String, name: String)
 
-class Game extends Actor with ActorLogging {
+class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
 
   var playersMap:  mutable.Map[String, Player] = mutable.Map.empty
 
@@ -24,13 +24,13 @@ class Game extends Actor with ActorLogging {
       val id = sessionId
       val name = "random name"
       playersMap.put(sessionId, Player(id, name))
-      sender ! PlayerJoined(id, name)
+      broadcast ! PlayerJoined(id, name)
     }
 
     case PlayerLeave(sessionId) => {
       playersMap.remove(sessionId).map { player =>
         holders.filter { case (piece, holder) => player == holder }.map { case (piece, _) => holders.remove(piece) }
-        sender ! PlayerLeft(player.id)
+        broadcast ! PlayerLeft(player.id)
       }
     }
 
@@ -47,7 +47,7 @@ class Game extends Actor with ActorLogging {
         val piece = Piece(pieceId)
         if (isValidPiece(piece) && pieceHolder(piece) == None) {
           holders.put(piece, player)
-          sender ! PiecePicked(player, pieceId)
+          broadcast ! PiecePicked(player, pieceId)
         }
       }
     }
@@ -62,8 +62,8 @@ class Game extends Actor with ActorLogging {
           (movedPiece, movedPosition) <- board.move(piece, position)
         } yield {
           holders.remove(piece)
-          sender ! PieceMoved(piece.id, position)
-          sender ! PieceMoved(movedPiece.id, movedPosition)
+          broadcast ! PieceMoved(piece.id, position)
+          broadcast ! PieceMoved(movedPiece.id, movedPosition)
         }
       }
     }
