@@ -27,6 +27,12 @@ class Serializer extends Writes[OutgoingEvent] {
         "id" -> id
       ))
     )
+    case PlayerLogin(player) => Json.obj(
+      "name" -> "player:login",
+      "args" -> Json.arr(Json.obj(
+        "id" -> player.id
+      ))
+    )
     case BoardSynced(board) => Json.obj(
       "name" -> "board:synced",
       "args" -> Json.arr(Json.obj(

@@ -23,7 +23,9 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
     case PlayerJoin(sessionId) => {
       val id = sessionId
       val name = Name.name
-      playersMap.put(sessionId, Player(id, name))
+      val player = Player(id, name)
+      playersMap.put(sessionId, player)
+      sender ! PlayerLogin(player)
       broadcast ! PlayerJoined(id, name)
     }
 
