@@ -39,6 +39,7 @@ class Serializer extends Writes[OutgoingEvent] {
         "imageURL" -> board.imageURL,
         "width" -> board.width,
         "height" -> board.height,
+        "finished" -> board.isFinished,
         "pieces" -> Json.toJson(
           board.positions.map { position =>
             Json.obj(
