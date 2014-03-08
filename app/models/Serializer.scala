@@ -50,6 +50,10 @@ class Serializer extends Writes[OutgoingEvent] {
         )
       ))
     )
+    case BoardFinished() => Json.obj(
+      "name" -> "board:finished",
+      "args" -> Json.arr()
+    )
     case PiecePicked(player, pieceId) => Json.obj(
       "name" -> "piece:picked",
       "args" -> Json.arr(Json.obj(
