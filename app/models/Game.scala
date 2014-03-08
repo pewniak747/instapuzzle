@@ -14,7 +14,7 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
 
   var holders:   mutable.Map[Piece, Player]  = mutable.Map.empty
 
-  var board = new Board("http://distilleryimage8.s3.amazonaws.com/bf900ab4a39f11e38caa0e38f102355c_8.jpg", 8, 8)
+  var board = new Board("http://distilleryimage6.ak.instagram.com/6191e200971711e3bad01215527ad906_8.jpg", 8, 8)
 
   board.shuffle
 
