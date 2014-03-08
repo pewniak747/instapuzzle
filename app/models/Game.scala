@@ -3,6 +3,7 @@ package models
 import akka.actor._
 import scala.collection.mutable
 import scala.concurrent.duration._
+import scala.util.Random
 import faker.Name
 
 import play.api.libs.concurrent.Execution.Implicits._
@@ -19,9 +20,16 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
 
   var holders:   mutable.Map[Piece, Player]  = mutable.Map.empty
 
-  var board = new Board("http://distilleryimage6.ak.instagram.com/6191e200971711e3bad01215527ad906_8.jpg", 4, 4)
+  val images = Set(
+    "http://distilleryimage6.ak.instagram.com/6191e200971711e3bad01215527ad906_8.jpg",
+    "http://distilleryimage7.ak.instagram.com/57a2ac147ed211e3962a12bf16838833_8.jpg",
+    "http://distilleryimage3.ak.instagram.com/ccb35e56a6c111e38aca0e51ab9d14d3_8.jpg",
+    "http://distilleryimage3.ak.instagram.com/992f8acca6c211e38f0d1262a4bedf57_8.jpg"
+  )
 
-  board.shuffle
+  val sizes = Set((5, 5), (6, 6), (8, 8), (10, 10), (12, 12))
+
+  var board: Board = newBoard
 
   def receive = started
 
@@ -62,8 +70,7 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
 
   def finished: Receive = players orElse {
     case BoardChange => {
-      board = new Board("http://distilleryimage8.s3.amazonaws.com/106802c4a3b011e3bad2124a1fe00c8c_8.jpg", 3, 3)
-      board.shuffle
+      board = newBoard
       context.become(started)
       broadcast ! BoardSynced(board)
     }
@@ -98,5 +105,13 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
   private def isValidPiece(piece: Piece) = board.pieces contains piece
 
   private def pieceHolder(piece: Piece) = holders.get(piece)
+
+  private def newBoard: Board = {
+    val image = Random.shuffle(images).head
+    val (width, height) = Random.shuffle(sizes).head
+    board = new Board(image, width, height)
+    board.shuffle
+    board
+  }
 
 }
