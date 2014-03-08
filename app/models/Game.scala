@@ -2,11 +2,16 @@ package models
 
 import akka.actor._
 import scala.collection.mutable
+import scala.concurrent.duration._
 import faker.Name
+
+import play.api.libs.concurrent.Execution.Implicits._
 
 import controllers._
 
 case class Player(id: String, name: String)
+
+case object BoardChange
 
 class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
 
@@ -46,13 +51,23 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
           if (board.isFinished) {
             context.become(finished)
             broadcast ! BoardFinished()
+            context.system.scheduler.scheduleOnce(5.seconds) {
+              self ! BoardChange
+            }
           }
         }
       }
     }
   }
 
-  def finished: Receive = players
+  def finished: Receive = players orElse {
+    case BoardChange => {
+      board = new Board("http://distilleryimage8.s3.amazonaws.com/106802c4a3b011e3bad2124a1fe00c8c_8.jpg", 3, 3)
+      board.shuffle
+      context.become(started)
+      broadcast ! BoardSynced(board)
+    }
+  }
 
   def players: Receive = {
     case PlayerJoin(sessionId) => {
