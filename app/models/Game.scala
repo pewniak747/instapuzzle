@@ -18,9 +18,9 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
 
   board.shuffle
 
-  def receive = started orElse players
+  def receive = started
 
-  def started: Receive = {
+  def started: Receive = players orElse {
     case PiecePickup(sessionId, pieceId) => {
       playersMap.get(sessionId).map { player =>
         val piece = Piece(pieceId)
