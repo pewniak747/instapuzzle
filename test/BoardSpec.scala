@@ -1,6 +1,7 @@
 import org.specs2.mutable._
 import org.specs2.specification._
 
+import models.Image
 import models.Board
 import models.Piece
 import models.Position
@@ -8,7 +9,8 @@ import models.Position
 class BoardSpec extends Specification {
 
   trait WithBoard extends NameSpace {
-    val board = new Board("image-url", 3, 2)
+    val image = Image("image-url", "")
+    val board = new Board(image, 3, 2)
   }
 
   "Board" should {
@@ -26,7 +28,7 @@ class BoardSpec extends Specification {
     }
 
     "have image URL" in new WithBoard {
-      board.imageURL must equalTo("image-url")
+      board.image.url must equalTo("image-url")
     }
 
     "have width x height pieces" in new WithBoard {

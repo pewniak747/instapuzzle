@@ -14,8 +14,11 @@ case class Position(val x: Int, val y: Int) {
   require(y >= 0)
 }
 
-class Board(val imageURL: String, val width: Int, val height: Int) {
-  require(imageURL.size > 0)
+case class Image(val url: String, val sourceUrl: String) {
+  require(url.size > 0)
+}
+
+class Board(val image: Image, val width: Int, val height: Int) {
   require(width > 1)
   require(height > 1)
 

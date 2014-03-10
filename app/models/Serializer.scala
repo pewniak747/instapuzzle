@@ -36,7 +36,10 @@ class Serializer extends Writes[OutgoingEvent] {
     case BoardSynced(board) => Json.obj(
       "name" -> "board:synced",
       "args" -> Json.arr(Json.obj(
-        "imageURL" -> board.imageURL,
+        "image" -> Json.obj(
+          "url" -> board.image.url,
+          "source" -> board.image.sourceUrl
+        ),
         "width" -> board.width,
         "height" -> board.height,
         "finished" -> board.isFinished,
