@@ -21,7 +21,7 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
   var holders:   mutable.Map[Piece, Player]  = mutable.Map.empty
 
   val images = List(
-    Image("http://distilleryimage0.ak.instagram.com/da5da88ca91311e3b145120e7295bf20_8.jpg", "http://instagram.com/p/lZsC2anc1C")
+    Image("http://distilleryimage4.ak.instagram.com/1c298576a90d11e3b4de12ff50c9f474_8.jpg", "http://instagram.com/p/lZme-zAm-B")
   )
 
   val sizes = List((8, 8))
