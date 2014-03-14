@@ -58,11 +58,11 @@ class Serializer extends Writes[OutgoingEvent] {
       "name" -> "board:finished",
       "args" -> Json.arr()
     )
-    case PiecePicked(player, pieceId) => Json.obj(
+    case PiecePicked(piece, player) => Json.obj(
       "name" -> "piece:picked",
       "args" -> Json.arr(Json.obj(
         "player_id" -> player.id,
-        "piece_id" -> pieceId
+        "piece_id" -> piece.id
       ))
     )
     case PieceCorrect(piece) => Json.obj(
@@ -71,10 +71,10 @@ class Serializer extends Writes[OutgoingEvent] {
         "piece_id" -> piece.id
       ))
     )
-    case PieceMoved(pieceId, position) => Json.obj(
+    case PieceMoved(piece, position) => Json.obj(
       "name" -> "piece:moved",
       "args" -> Json.arr(Json.obj(
-        "piece_id" -> pieceId,
+        "piece_id" -> piece.id,
         "position" -> Json.obj(
           "x" -> position.x,
           "y" -> position.y

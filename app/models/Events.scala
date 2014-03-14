@@ -28,9 +28,9 @@ case class BoardSynced(board: Board) extends OutgoingEvent
 
 case class BoardFinished() extends OutgoingEvent
 
-case class PiecePicked(player: Player, pieceId: String) extends OutgoingEvent
+case class PiecePicked(piece: Piece, player: Player) extends OutgoingEvent
 
-case class PieceMoved(pieceId: String, position: Position) extends OutgoingEvent
+case class PieceMoved(piece: Piece, position: Position) extends OutgoingEvent
 
 case class PieceCorrect(piece: Piece) extends OutgoingEvent
 

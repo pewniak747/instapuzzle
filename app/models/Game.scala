@@ -37,7 +37,7 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
         if (isValidPiece(piece) && pieceHolder(piece) == None) {
           if (!board.isAtCorrectPosition(piece)) {
             holders.put(piece, player)
-            broadcast ! PiecePicked(player, pieceId)
+            broadcast ! PiecePicked(piece, player)
           } else {
             sender ! PieceCorrect(piece)
           }
@@ -55,8 +55,8 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
           (movedPiece, movedPosition) <- board.move(piece, position)
         } yield {
           holders.remove(piece)
-          broadcast ! PieceMoved(piece.id, position)
-          broadcast ! PieceMoved(movedPiece.id, movedPosition)
+          broadcast ! PieceMoved(piece, position)
+          broadcast ! PieceMoved(movedPiece, movedPosition)
           if (board.isFinished) {
             context.become(finished)
             holders.clear
