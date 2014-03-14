@@ -51,19 +51,25 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
         val position = Position(x, y)
         for {
           piece <- Some(piece) if isValidPiece(piece);
-          movingPlayer <- holders.get(piece) if player == movingPlayer;
-          (movedPiece, movedPosition) <- board.move(piece, position)
+          targetPiece <- board.at(position);
+          movingPlayer <- holders.get(piece) if player == movingPlayer
         } yield {
-          holders.remove(piece)
-          broadcast ! PieceMoved(piece, position)
-          broadcast ! PieceMoved(movedPiece, movedPosition)
-          if (board.isFinished) {
-            context.become(finished)
-            holders.clear
-            broadcast ! BoardFinished()
-            context.system.scheduler.scheduleOnce(5.seconds) {
-              self ! BoardChange
+          if (!board.isAtCorrectPosition(targetPiece)) {
+            for((movedPiece, movedPosition) <- board.move(piece, position)) yield {
+              holders.remove(piece)
+              broadcast ! PieceMoved(piece, position)
+              broadcast ! PieceMoved(movedPiece, movedPosition)
+              if (board.isFinished) {
+                context.become(finished)
+                holders.clear
+                broadcast ! BoardFinished()
+                context.system.scheduler.scheduleOnce(5.seconds) {
+                  self ! BoardChange
+                }
+              }
             }
+          } else {
+            sender ! PieceCorrect(targetPiece)
           }
         }
       }
