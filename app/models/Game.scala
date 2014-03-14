@@ -55,6 +55,7 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
           broadcast ! PieceMoved(movedPiece.id, movedPosition)
           if (board.isFinished) {
             context.become(finished)
+            holders.clear
             broadcast ! BoardFinished()
             context.system.scheduler.scheduleOnce(5.seconds) {
               self ! BoardChange
