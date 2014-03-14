@@ -35,8 +35,12 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
       playersMap.get(sessionId).map { player =>
         val piece = Piece(pieceId)
         if (isValidPiece(piece) && pieceHolder(piece) == None) {
-          holders.put(piece, player)
-          broadcast ! PiecePicked(player, pieceId)
+          if (!board.isAtCorrectPosition(piece)) {
+            holders.put(piece, player)
+            broadcast ! PiecePicked(player, pieceId)
+          } else {
+            sender ! PieceCorrect(piece)
+          }
         }
       }
     }

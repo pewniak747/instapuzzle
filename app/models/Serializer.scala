@@ -65,6 +65,12 @@ class Serializer extends Writes[OutgoingEvent] {
         "piece_id" -> pieceId
       ))
     )
+    case PieceCorrect(piece) => Json.obj(
+      "name" -> "piece:correct",
+      "args" -> Json.arr(Json.obj(
+        "piece_id" -> piece.id
+      ))
+    )
     case PieceMoved(pieceId, position) => Json.obj(
       "name" -> "piece:moved",
       "args" -> Json.arr(Json.obj(

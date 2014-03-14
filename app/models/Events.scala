@@ -32,4 +32,6 @@ case class PiecePicked(player: Player, pieceId: String) extends OutgoingEvent
 
 case class PieceMoved(pieceId: String, position: Position) extends OutgoingEvent
 
+case class PieceCorrect(piece: Piece) extends OutgoingEvent
+
 case class PlayerLogin(player: Player) extends OutgoingEvent

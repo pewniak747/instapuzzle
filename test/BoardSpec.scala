@@ -138,6 +138,20 @@ class BoardSpec extends Specification {
 
     }
 
+    "isAtCorrectPosition" in new WithBoard {
+
+      val piece = board.pieces.head
+
+      "is true for piece in correct position" in {
+        board.isAtCorrectPosition(piece) must beTrue
+      }
+
+      "is false for piece in incorrect position" in new WithBoard {
+        board.move(piece, Position(1, 1))
+        board.isAtCorrectPosition(piece) must beFalse
+      }
+    }
+
     "shuffle" in new WithBoard {
 
       "makes board not finished" in {

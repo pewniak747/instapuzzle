@@ -38,6 +38,11 @@ class Board(val image: Image, val width: Int, val height: Int) {
 
   def at(pos: Position): Option[Piece] = piecePositions.get(pos)
 
+  def isAtCorrectPosition(piece: Piece) = positionOf(piece) match {
+    case Some(position) => correctPositions(position) == piece
+    case _ => false
+  }
+
   def move(piece: Piece, target: Position) = {
     for {
       targetPiece <- at(target);
