@@ -29,6 +29,10 @@ class QueuedImages(tag: Tag) extends Table[QueuedImage](tag, "queued_images") {
 }
 
 object QueuedImagesRepo {
+  def insert(queuedImage: QueuedImage) = DB.withSession { implicit s =>
+    table += queuedImage
+  }
+
   def sample: QueuedImage = DB.withSession { implicit s =>
     table.first
   }
