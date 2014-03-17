@@ -33,7 +33,7 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
 
   val sizes = List((5, 5), (6, 6), (8, 8), (10, 10))
 
-  var board: Board = newBoard
+  var board: Option[Board] = Some(newBoard)
 
   def receive = started
 
@@ -42,7 +42,7 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
       playersMap.get(sessionId).map { player =>
         val piece = Piece(pieceId)
         if (isValidPiece(piece) && canPickup(player, piece)) {
-          if (!board.isAtCorrectPosition(piece)) {
+          if (!board.get.isAtCorrectPosition(piece)) {
             holders.put(piece, player)
             broadcast ! PiecePicked(piece, player)
           } else {
@@ -57,6 +57,7 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
         val piece = Piece(pieceId)
         val position = Position(x, y)
         for {
+          board <- board;
           piece <- Some(piece) if isValidPiece(piece);
           targetPiece <- board.at(position);
           movingPlayer <- holders.get(piece) if player == movingPlayer
@@ -85,9 +86,9 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
 
   def finished: Receive = players orElse {
     case BoardChange => {
-      board = newBoard
+      board = Some(newBoard)
       context.become(started)
-      broadcast ! BoardSynced(board)
+      broadcast ! BoardSynced(board.get)
     }
   }
 
@@ -113,11 +114,11 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
     }
 
     case BoardSync(sessionId) => {
-      sender ! BoardSynced(board)
+      sender ! BoardSynced(board.get)
     }
   }
 
-  private def isValidPiece(piece: Piece) = board.pieces contains piece
+  private def isValidPiece(piece: Piece) = board.get.pieces contains piece
 
   private def canPickup(player: Player, piece: Piece) = pieceHolder(piece) == None && holding(player) == None
 
@@ -128,7 +129,7 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
   private def newBoard: Board = {
     val image = Random.shuffle(images).head
     val (width, height) = Random.shuffle(sizes).head
-    board = new Board(image, width, height)
+    val board = new Board(image, width, height)
     board.shuffle
     board
   }
