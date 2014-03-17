@@ -41,7 +41,7 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
     case PiecePickup(sessionId, pieceId) => {
       playersMap.get(sessionId).map { player =>
         val piece = Piece(pieceId)
-        if (isValidPiece(piece) && pieceHolder(piece) == None) {
+        if (isValidPiece(piece) && canPickup(player, piece)) {
           if (!board.isAtCorrectPosition(piece)) {
             holders.put(piece, player)
             broadcast ! PiecePicked(piece, player)
@@ -119,7 +119,11 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
 
   private def isValidPiece(piece: Piece) = board.pieces contains piece
 
+  private def canPickup(player: Player, piece: Piece) = pieceHolder(piece) == None && holding(player) == None
+
   private def pieceHolder(piece: Piece) = holders.get(piece)
+
+  private def holding(player: Player) = holders.map(_.swap).get(player)
 
   private def newBoard: Board = {
     val image = Random.shuffle(images).head
