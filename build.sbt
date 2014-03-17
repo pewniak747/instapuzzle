@@ -6,8 +6,8 @@ libraryDependencies ++= Seq(
   jdbc,
   anorm,
   cache,
-  "com.typesafe.slick" %% "slick" % "1.0.1",
-  "com.typesafe.play" %% "play-slick" % "0.5.0.8"
+  "com.typesafe.slick" %% "slick" % "2.0.0",
+  "com.typesafe.play" %% "play-slick" % "0.6.0.1"
 )
 
 resolvers += "justwrote" at "http://repo.justwrote.it/releases/"
