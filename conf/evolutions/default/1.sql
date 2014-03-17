@@ -3,7 +3,7 @@
 
 # --- !Ups
 
-create table "queued_images" ("created_at" BIGINT NOT NULL,"image_url" VARCHAR NOT NULL,"source_url" VARCHAR NOT NULL);
+create table "queued_images" ("created_at" BIGINT NOT NULL,"image_url" VARCHAR NOT NULL,"size" INTEGER NOT NULL,"source_url" VARCHAR NOT NULL);
 
 # --- !Downs
 
