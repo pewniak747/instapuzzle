@@ -88,7 +88,7 @@ class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
 
     case PlayerLeave(sessionId) => {
       playersMap.remove(sessionId).map { player =>
-        holders.filter { case (piece, holder) => player == holder }.map { case (piece, _) => holders.remove(piece) }
+        holders.dropWhile { case (piece, holder) => player == holder }
         broadcast ! PlayerLeft(player.id)
       }
     }
