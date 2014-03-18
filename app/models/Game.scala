@@ -11,10 +11,6 @@ import controllers._
 
 case class Player(id: String, name: String)
 
-case class BoardChange(board: Board)
-
-case object BoardRequest
-
 class Game(val broadcast: ActorRef) extends Actor with ActorLogging {
 
   var playersMap: mutable.Map[String, Player] = mutable.Map.empty
