@@ -1,6 +1,6 @@
 package repositories
 
-import scala.slick.driver.H2Driver.simple._
+import scala.slick.driver.PostgresDriver.simple._
 import play.api.db.slick.DB
 import play.api.Play.current
 
@@ -34,7 +34,7 @@ object QueuedImagesRepo {
   }
 
   def sample: QueuedImage = DB.withSession { implicit s =>
-    table.first
+    table.sortBy(_.createdAt.desc).first
   }
 
   val table = TableQuery[QueuedImages]
