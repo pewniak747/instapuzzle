@@ -1,5 +1,6 @@
 package repositories
 
+import scala.util.Random
 import scala.slick.driver.PostgresDriver.simple._
 import play.api.db.slick.DB
 import play.api.Play.current
@@ -29,13 +30,17 @@ class QueuedImages(tag: Tag) extends Table[QueuedImage](tag, "queued_images") {
 }
 
 object QueuedImagesRepo {
+
   def insert(queuedImage: QueuedImage) = DB.withSession { implicit s =>
     table += queuedImage
   }
 
   def sample: QueuedImage = DB.withSession { implicit s =>
-    table.sortBy(_.createdAt.desc).first
+    val count = table.length.run
+    val offset = Random.nextInt(count)
+    table.drop(offset).first
   }
 
   val table = TableQuery[QueuedImages]
+
 }
