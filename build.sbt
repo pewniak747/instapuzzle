@@ -8,7 +8,8 @@ libraryDependencies ++= Seq(
   cache,
   "com.typesafe.slick" %% "slick" % "2.0.0",
   "com.typesafe.play" %% "play-slick" % "0.6.0.1",
-  "postgresql" % "postgresql" % "9.1-901.jdbc4"
+  "postgresql" % "postgresql" % "9.1-901.jdbc4",
+  "net.databinder.dispatch" %% "dispatch-core" % "0.11.0"
 )
 
 resolvers += "justwrote" at "http://repo.justwrote.it/releases/"
