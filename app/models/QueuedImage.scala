@@ -1,3 +1,3 @@
 package models
 
-case class QueuedImage(val id: Long, val createdAt: Long, val size: Int, val image: Image)
+case class QueuedImage(val id: Option[Long], val createdAt: Long, val size: Int, val image: Image)

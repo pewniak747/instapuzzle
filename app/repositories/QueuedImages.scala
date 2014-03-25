@@ -8,7 +8,7 @@ import play.api.Play.current
 import models.{QueuedImage,Image}
 
 class QueuedImages(tag: Tag) extends Table[QueuedImage](tag, "queued_images") {
-  def id = column[Long]("created_at")
+  def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
   def imageURL = column[String]("image_url")
 
@@ -18,10 +18,10 @@ class QueuedImages(tag: Tag) extends Table[QueuedImage](tag, "queued_images") {
 
   def createdAt = column[Long]("created_at")
 
-  def * = (id, imageURL, size, sourceURL, createdAt) <> (map _, unmap _)
+  def * = (id.?, imageURL, size, sourceURL, createdAt) <> (map _, unmap _)
 
-  def map(tuple: (Long, String, Int, String, Long)) = tuple match {
-    case (id: Long, imageURL: String, size: Int, sourceURL: String, createdAt: Long) =>
+  def map(tuple: (Option[Long], String, Int, String, Long)) = tuple match {
+    case (id: Option[Long], imageURL: String, size: Int, sourceURL: String, createdAt: Long) =>
       QueuedImage(id, createdAt, size, Image(imageURL, sourceURL))
   }
 
