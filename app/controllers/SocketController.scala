@@ -1,6 +1,7 @@
 package controllers
 
 import scala.concurrent.duration._
+import scala.util.Try
 import akka.util.Timeout
 import akka.actor._
 import play.api.libs.concurrent.Akka
@@ -79,22 +80,16 @@ object MySocketIOController extends SocketIOController {
 
   private
 
-  def parseIncomingEvent(sessionId: String, data: String): Option[IncomingEvent] = {
-    try {
-      val json = Json.parse(data)
-      val eventName = json \ "name"
-      val eventArgs = Json.fromJson[List[JsValue]](json \ "args")
-      (eventName, eventArgs) match {
-        case (JsString("player:join"), _) => Some(PlayerJoin(sessionId))
-        case (JsString("player:sync"), _) => Some(PlayersSync(sessionId))
-        case (JsString("board:sync"), _) => Some(BoardSync(sessionId))
-        case (JsString("piece:pickup"), JsSuccess(List(JsString(pieceId)), _)) => Some(PiecePickup(sessionId, pieceId))
-        case (JsString("piece:move"), JsSuccess(List(JsObject(Seq(("id", JsString(pieceId)), ("x", JsNumber(x)), ("y", JsNumber(y))))), _)) => Some(PieceMove(sessionId, pieceId, x.toInt, y.toInt))
-        case _ => None
-      }
-    }
-    catch {
-      case _: Throwable => None
+  def parseIncomingEvent(sessionId: String, data: String): Try[IncomingEvent] = Try {
+    val json = Json.parse(data)
+    val eventName = json \ "name"
+    val eventArgs = Json.fromJson[List[JsValue]](json \ "args")
+    (eventName, eventArgs) match {
+      case (JsString("player:join"), _) => PlayerJoin(sessionId)
+      case (JsString("player:sync"), _) => PlayersSync(sessionId)
+      case (JsString("board:sync"), _) => BoardSync(sessionId)
+      case (JsString("piece:pickup"), JsSuccess(List(JsString(pieceId)), _)) => PiecePickup(sessionId, pieceId)
+      case (JsString("piece:move"), JsSuccess(List(JsObject(Seq(("id", JsString(pieceId)), ("x", JsNumber(x)), ("y", JsNumber(y))))), _)) => PieceMove(sessionId, pieceId, x.toInt, y.toInt)
     }
   }
 
